@@ -85,7 +85,6 @@ nn_nnet <- nnet::nnet(X, Boston$medv, Wts = nn$W_opt, size = nn$q,
 library(statnn)
 stnn <- statnn(nn_nnet, X)  
 summary(stnn)
-
 ```
 
 class: title-slide, left, bottom
@@ -197,6 +196,31 @@ cat(c(capture.output(summary(nnet_model))[c(1:10)], "[...]"),
 ```
 
 
+---
+
+
+# Proposed Solution: statnn
+
+--
+
+.left-column[ 
+<br>
+```{r, echo=FALSE, out.width="80%", fig.align="center"}
+knitr::include_graphics("img/statnn.png")
+``` 
+]
+
+--
+
+.right-column[
+<br>
+<br>
+```{r, echo=TRUE, eval = FALSE}
+# install.packages("devtools")
+library(devtools)
+install_github("andrew-mcinerney/statnn")
+``` 
+]
 
 
 ---
@@ -222,7 +246,7 @@ $$
 --
 
 $$
-\ell(\theta)= -\frac{n}{2}\log(2\pi\sigma^2)-\frac{1}{2\sigma^2}\sum_{i=1}^n(y_i-\text{NN}(x_i))^2
+\ell(\theta, \sigma^2)= -\frac{n}{2}\log(2\pi\sigma^2)-\frac{1}{2\sigma^2}\sum_{i=1}^n(y_i-\text{NN}(x_i))^2
 $$
 
 ---
@@ -286,6 +310,23 @@ A Statistically-Based Approach to Feedforward Neural Network Model Selection (ar
 
 ---
 
+# Boston Housing: Model Selection 
+
+
+```{r selection, echo = TRUE, eval = FALSE}
+library(statnn)
+nn <- selectnn(medv ~ ., data = Boston, Q = 10,
+               n_init = 10, maxit = 5000)
+summary(nn)
+```
+
+--
+
+```{r summ, echo = FALSE, cache = TRUE, class.output = "bg-primary"}
+cat(c(capture.output(summary(nn))[c(1:7, 10:11, 15, 19)], "[...]"), sep = "\n")  
+```
+
+---
 
 # Hypothesis Testing
 
@@ -345,32 +386,22 @@ $$
 {{content}}
 
 
+---
 
-<!-- --- -->
+# Boston Housing: Model Summary 
 
-<!-- # Covariate-Effect Plots -->
 
-<!-- Propose covariate-effect plots of the following form: -->
+```{r stnn, message = FALSE, eval = FALSE, tidy = FALSE}
+stnn <- statnn(nn)  
+summary(stnn)
+```
 
-<!-- -- -->
+--
 
-<!-- $$ -->
-<!-- \begin{equation} -->
-<!--  \hat{\beta}_j(x) = \frac{1}{n}\sum_{i=1}^n \left[ g(x + \sigma_{j}, X \setminus x_{ij}) - g(x, X \setminus x_{ij}) \right] -->
-<!-- \end{equation} -->
-<!-- $$ -->
-
-<!-- -- -->
-
-<!-- And their associated uncertainty: -->
-
-<!-- -- -->
-
-<!-- $$ -->
-<!-- \begin{equation} -->
-<!--   \hat{\beta}_j(x) \sim N[\beta_j(x), \nabla_\theta^T \beta_j(x) ~ \Sigma ~ \nabla_\theta \beta_j(x)] -->
-<!-- \end{equation} -->
-<!-- $$ -->
+```{r summst, echo = FALSE, cache = TRUE, class.output = "bg-primary"}
+cat(c("[...]", capture.output(summary(stnn))[10:22]
+      , "[...]"), sep = "\n")
+```
 
 
 ---
@@ -403,91 +434,6 @@ Usually set $d = \text{SD}(x_j)$
 
 Associated uncertainty via delta method.
 
-
----
-
-
-# R Implementation
-
---
-
-.left-column[ 
-<br>
-```{r, echo=FALSE, out.width="80%", fig.align="center"}
-knitr::include_graphics("img/statnn.png")
-``` 
-]
-
---
-
-.right-column[
-<br>
-<br>
-```{r, echo=TRUE, eval = FALSE}
-# install.packages("devtools")
-library(devtools)
-install_github("andrew-mcinerney/statnn")
-``` 
-]
-
-
----
-
-# Data Application (Revistied)
-
-### Boston Housing Data (Kaggle)
-
-506 communities in Boston, MA.   
-
---
-
- 
-Response: 
-
-- `medv` (median value of owner-occupied homes)    
-
---
-
-12 Explanatory Variables:  
-
-- `rm` (average number of rooms per dwelling)  
-
-- `lstat` (proportion of population that are disadvantaged)
-
----
-
-# Boston Housing: Model Selection 
-
-
-```{r selection, echo = TRUE, eval = FALSE}
-library(statnn)
-nn <- selectnn(medv ~ ., data = Boston, Q = 10,
-               n_init = 10, maxit = 5000)
-summary(nn)
-```
-
---
-
-```{r summ, echo = FALSE, cache = TRUE, class.output = "bg-primary"}
-cat(c(capture.output(summary(nn))[c(1:7, 10:11, 15, 19)], "[...]"), sep = "\n")  
-```
-
----
-
-# Boston Housing: Model Summary 
-
-
-```{r stnn, message = FALSE, eval = FALSE, tidy = FALSE}
-stnn <- statnn(nn)  
-summary(stnn)
-```
-
---
-
-```{r summst, echo = FALSE, cache = TRUE, class.output = "bg-primary"}
-cat(c("[...]", capture.output(summary(stnn))[12:24]
-      , "[...]"), sep = "\n")  
-```
 
 ---
 

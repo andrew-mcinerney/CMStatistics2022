@@ -119,18 +119,42 @@ summary(nn)
 ```{.bg-primary}
 ## a 11-8-1 network with 105 weights
 ## options were - linear output units 
-##   b-&gt;h1  i1-&gt;h1  i2-&gt;h1  i3-&gt;h1  i4-&gt;h1  i5-&gt;h1  i6-&gt;h1  i7-&gt;h1  i8-&gt;h1  i9-&gt;h1 i10-&gt;h1 i11-&gt;h1 
-##    2.79    5.92    0.34    1.31    0.23   -1.31   -2.67    0.77   -0.22    1.46    1.20    1.26 
-##   b-&gt;h2  i1-&gt;h2  i2-&gt;h2  i3-&gt;h2  i4-&gt;h2  i5-&gt;h2  i6-&gt;h2  i7-&gt;h2  i8-&gt;h2  i9-&gt;h2 i10-&gt;h2 i11-&gt;h2 
-##   20.53    5.59    3.52   -0.64   12.64   -5.25   -4.12    0.24    2.64    0.49  -21.17    4.03 
-##   b-&gt;h3  i1-&gt;h3  i2-&gt;h3  i3-&gt;h3  i4-&gt;h3  i5-&gt;h3  i6-&gt;h3  i7-&gt;h3  i8-&gt;h3  i9-&gt;h3 i10-&gt;h3 i11-&gt;h3 
-##   23.46   59.84  -37.64  -20.10    1.60   37.03   -4.74  -34.65  128.73  -20.36    7.16   24.70 
-##   b-&gt;h4  i1-&gt;h4  i2-&gt;h4  i3-&gt;h4  i4-&gt;h4  i5-&gt;h4  i6-&gt;h4  i7-&gt;h4  i8-&gt;h4  i9-&gt;h4 i10-&gt;h4 i11-&gt;h4 
-##   -0.35   -0.79    6.19   11.94    0.78   -6.34    3.35   -1.71    7.61    2.77   -2.68    0.15 
+##   b-&gt;h1  i1-&gt;h1  i2-&gt;h1  i3-&gt;h1  i4-&gt;h1  i5-&gt;h1  i6-&gt;h1  i7-&gt;h1  i8-&gt;h1  i9-&gt;h1 i10-&gt;h1 
+##    2.79    5.92    0.34    1.31    0.23   -1.31   -2.67    0.77   -0.22    1.46    1.20 
+## i11-&gt;h1 
+##    1.26 
+##   b-&gt;h2  i1-&gt;h2  i2-&gt;h2  i3-&gt;h2  i4-&gt;h2  i5-&gt;h2  i6-&gt;h2  i7-&gt;h2  i8-&gt;h2  i9-&gt;h2 i10-&gt;h2 
+##   20.53    5.59    3.52   -0.64   12.64   -5.25   -4.12    0.24    2.64    0.49  -21.17 
+## i11-&gt;h2 
+##    4.03 
 ## [...]
 ```
 
 
+---
+
+
+# Proposed Solution: statnn
+
+--
+
+.left-column[ 
+&lt;br&gt;
+&lt;img src="img/statnn.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+.right-column[
+&lt;br&gt;
+&lt;br&gt;
+
+```r
+# install.packages("devtools")
+library(devtools)
+install_github("andrew-mcinerney/statnn")
+```
+]
 
 
 ---
@@ -218,6 +242,36 @@ A Statistically-Based Approach to Feedforward Neural Network Model Selection (ar
 
 ---
 
+# Boston Housing: Model Selection 
+
+
+
+```r
+library(statnn)
+nn &lt;- selectnn(medv ~ ., data = Boston, Q = 10,
+               n_init = 10, maxit = 5000)
+summary(nn)
+```
+
+--
+
+
+```{.bg-primary}
+## Call:
+## selectnn.formula(formula = medv ~ ., data = Boston, Q = 10, n_init = 10, 
+##     maxit = 5000)
+## 
+## Number of input nodes: 8 
+## Number of hidden nodes: 4 
+## 
+## Inputs:
+##  Covariate Selected Delta.BIC
+##         rm      Yes   236.907
+##      lstat      Yes   168.023
+## [...]
+```
+
+---
 
 # Hypothesis Testing
 
@@ -273,32 +327,37 @@ $$
 {{content}}
 
 
+---
 
-&lt;!-- --- --&gt;
+# Boston Housing: Model Summary 
 
-&lt;!-- # Covariate-Effect Plots --&gt;
 
-&lt;!-- Propose covariate-effect plots of the following form: --&gt;
 
-&lt;!-- -- --&gt;
+```r
+stnn &lt;- statnn(nn)  
+summary(stnn)
+```
 
-&lt;!-- $$ --&gt;
-&lt;!-- \begin{equation} --&gt;
-&lt;!--  \hat{\beta}_j(x) = \frac{1}{n}\sum_{i=1}^n \left[ g(x + \sigma_{j}, X \setminus x_{ij}) - g(x, X \setminus x_{ij}) \right] --&gt;
-&lt;!-- \end{equation} --&gt;
-&lt;!-- $$ --&gt;
+--
 
-&lt;!-- -- --&gt;
 
-&lt;!-- And their associated uncertainty: --&gt;
-
-&lt;!-- -- --&gt;
-
-&lt;!-- $$ --&gt;
-&lt;!-- \begin{equation} --&gt;
-&lt;!--   \hat{\beta}_j(x) \sim N[\beta_j(x), \nabla_\theta^T \beta_j(x) ~ \Sigma ~ \nabla_\theta \beta_j(x)] --&gt;
-&lt;!-- \end{equation} --&gt;
-&lt;!-- $$ --&gt;
+```{.bg-primary}
+## [...]
+##                                         Wald
+##           Estimate Std. Error |      X^2    Pr(&gt; X^2)
+##     crim -0.115769   0.019085 | 109.8369 0.00e+00 ***
+##    indus -0.176500   0.018028 |  51.6302 1.65e-10 ***
+##      nox -0.163091   0.020639 |  39.4919 5.51e-08 ***
+##       rm  0.201211   0.017924 |  45.5051 3.12e-09 ***
+##      dis  0.101701   0.022437 |  14.6031 5.60e-03 ** 
+##      rad -0.099667   0.019687 | 107.3354 0.00e+00 ***
+##  ptratio -0.192649   0.016672 |   7.8733 9.63e-02 .  
+##    lstat -0.263402   0.014443 |  50.2500 3.20e-10 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## [...]
+```
 
 
 ---
@@ -331,118 +390,6 @@ Usually set `\(d = \text{SD}(x_j)\)`
 
 Associated uncertainty via delta method.
 
-
----
-
-
-# R Implementation
-
---
-
-.left-column[ 
-&lt;br&gt;
-&lt;img src="img/statnn.png" width="80%" style="display: block; margin: auto;" /&gt;
-]
-
---
-
-.right-column[
-&lt;br&gt;
-&lt;br&gt;
-
-```r
-# install.packages("devtools")
-library(devtools)
-install_github("andrew-mcinerney/statnn")
-```
-]
-
-
----
-
-# Data Application (Revistied)
-
-### Boston Housing Data (Kaggle)
-
-506 communities in Boston, MA.   
-
---
-
- 
-Response: 
-
-- `medv` (median value of owner-occupied homes)    
-
---
-
-12 Explanatory Variables:  
-
-- `rm` (average number of rooms per dwelling)  
-
-- `lstat` (proportion of population that are disadvantaged)
-
----
-
-# Boston Housing: Model Selection 
-
-
-
-```r
-library(statnn)
-nn &lt;- selectnn(medv ~ ., data = Boston, Q = 10,
-               n_init = 10, maxit = 5000)
-summary(nn)
-```
-
---
-
-
-```{.bg-primary}
-## Call:
-## selectnn.formula(formula = medv ~ ., data = Boston, Q = 10, n_init = 10, 
-##     maxit = 5000)
-## 
-## Number of input nodes: 8 
-## Number of hidden nodes: 4 
-## 
-## Inputs:
-##  Covariate Selected Delta.BIC
-##         rm      Yes   236.907
-##      lstat      Yes   168.023
-## [...]
-```
-
----
-
-# Boston Housing: Model Summary 
-
-
-
-```r
-stnn &lt;- statnn(nn)  
-summary(stnn)
-```
-
---
-
-
-```{.bg-primary}
-## [...]
-## Coefficients:
-##                                         Wald
-##           Estimate Std. Error |      X^2    Pr(&gt; X^2)
-##     crim -0.115769   0.019085 | 109.8369 0.00e+00 ***
-##    indus -0.176500   0.018028 |  51.6302 1.65e-10 ***
-##      nox -0.163091   0.020639 |  39.4919 5.51e-08 ***
-##       rm  0.201211   0.017924 |  45.5051 3.12e-09 ***
-##      dis  0.101701   0.022437 |  14.6031 5.60e-03 ** 
-##      rad -0.099667   0.019687 | 107.3354 0.00e+00 ***
-##  ptratio -0.192649   0.016672 |   7.8733 9.63e-02 .  
-##    lstat -0.263402   0.014443 |  50.2500 3.20e-10 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## [...]
-```
 
 ---
 
